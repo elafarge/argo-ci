@@ -70,20 +70,32 @@ export class GitHubScm implements common.Scm {
 
     private convertWebHookEvent(eventType: string, eventData): common.ScmEvent {
         if (eventType === 'push') {
+            const { clone_url, ref } = eventData.repository;
+            const refElts = ref.split('/');
+            const branch = refElts[refElts.length - 1];
+
+            const creds = this.getCredsByRepoUrl(clone_url);
+            const cloneUrl = clone_url.replace('github.com', `${creds.username}:${creds.password}@github.com`);
+
             return {
                 type: 'push',
                 commit: {
-                    repo: { cloneUrl: eventData.repository.clone_url, fullName: eventData.repository.full_name },
+                    repo: { cloneUrl, fullName: eventData.repository.full_name },
                     sha: eventData.head_commit.id,
+                    branch,
                 },
-                repo: { cloneUrl: eventData.repository.clone_url, fullName: eventData.repository.full_name },
+                repo: { cloneUrl, fullName: eventData.repository.full_name },
             };
         } else if (eventType === 'pull_request') {
+            const { clone_url } = eventData.pull_request.head.repo;
+            const creds = this.getCredsByRepoUrl(clone_url);
+            const cloneUrl = clone_url.replace('github.com', `${creds.username}:${creds.password}@github.com`);
             return {
                 type: 'pull_request',
                 commit: {
-                    repo: { cloneUrl: eventData.pull_request.head.repo.clone_url, fullName: eventData.pull_request.head.repo.full_name },
+                    repo: { cloneUrl, fullName: eventData.pull_request.head.repo.full_name },
                     sha: eventData.pull_request.head.sha,
+                    branch: eventData.pull_request.head.ref,
                 },
                 repo: { cloneUrl: eventData.pull_request.base.repo.clone_url, fullName: eventData.pull_request.base.repo.full_name },
             };

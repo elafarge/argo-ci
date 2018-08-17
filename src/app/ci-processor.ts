@@ -96,11 +96,15 @@ export class CiProcessor {
         if (ciWorkflow.spec.arguments && ciWorkflow.spec.arguments.parameters) {
             const revisionParam = ciWorkflow.spec.arguments.parameters.find(param => param.name === 'revision');
             const repoParam = ciWorkflow.spec.arguments.parameters.find(param => param.name === 'repo');
+            const branchParam = ciWorkflow.spec.arguments.parameters.find(param => param.name === 'branch');
             if (revisionParam) {
                 revisionParam.value = scmEvent.commit.sha;
             }
             if (repoParam) {
                 repoParam.value = scmEvent.commit.repo.cloneUrl;
+            }
+            if (branchParam) {
+                branchParam.value = scmEvent.commit.branch;
             }
         }
     }

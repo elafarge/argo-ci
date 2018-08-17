@@ -3,6 +3,7 @@ import * as express from 'express';
 export interface Commit {
     repo: Repository;
     sha: string;
+    branch: string;
 }
 
 export interface Repository {
